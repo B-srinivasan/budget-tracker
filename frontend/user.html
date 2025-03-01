@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker</title>
+    <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        header {
+    background-color: #6a1b9a;
+    padding: 1em;
+    color: white;
+}
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 100px; /* Adds spacing on left and right */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    flex-shrink: 0;
+    margin-left: -90px; /* Moves the heading to the left */
+}
+
+.container button {
+    color: white;
+    text-align: right;
+    padding: 6px 24px;
+    border: 2px solid #fff;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: -90px; /* Moves the button further to the right */
+}
+header nav {
+    display: flex;
+    gap: 5em;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Budget Tracker</h1>
+            <nav>
+                <a href="/user/dashboard.html">Dashboard</a>
+                <a href="/user/expenses.html">Manage Expenses</a>
+                <a href="/user/budgets.html">Manage Budgets</a>
+                <a href="/user/analytics.html">Reports and Analytics</a>
+            </nav>
+            <button id="logout">Logout</button>
+        </div>
+    </header>
+ <script>   
+    document.getElementById('logout').addEventListener('click', () => {
+        const confirmation = confirm('Are you sure you want to log out?');
+        if (confirmation) {
+            fetch('/logout', { method: 'GET', credentials: 'include' })
+                .then(() => {
+                    window.location.href = '/'; // Redirect to the login page
+                })
+                .catch(err => console.error('Error logging out:', err));
+        }
+    });
+</script>
+</body>
+</html>
+

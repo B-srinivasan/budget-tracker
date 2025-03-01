@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Registration Form</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a class="logo">Budget Tracker</a>
+            <ul class="items">
+                <li class="item">
+                    <a href="#" class="link" onclick="updateContent(homeContent)">
+                        <i class="uil uil-estate"></i> Home
+                    </a>
+                    <div class="dropdown">
+                        <a href="#" class="link dropdown-btn">
+                            <i class="uil uil-briefcase-alt"></i> Services <i class="uil uil-angle-down"></i>
+                        </a>
+                        <ul class="dropdown-content">
+                            <li><a href="#" onclick="updateContent(financialPlanning)">📊 Financial Planning</a></li>
+                            <li><a href="#" onclick="updateContent(budgeting)">💰 Budget Management</a></li>
+                            <li><a href="#" onclick="updateContent(expenseTracking)">📉 Expense Tracking</a></li>
+                        </ul>
+                    </div>
+                    <a href="#" class="link" onclick="updateContent(contactContent)">
+                        <i class="uil uil-phone"></i> Contact
+                    </a>
+                </li>
+            </ul>
+            <button class="button" id="form-open">Login</button>
+        </nav>
+        <p id="content">Welcome to Budget Tracker! A smart way to manage your finances efficiently. Click on the tabs above to explore more.</p>
+    </header>
+
+    <!-- Home -->
+    <section class="home">
+        <div class="form_container">
+            <i class="uil uil-times form_close"></i>
+            
+            <!-- Login Form -->
+            <div class="form login_form">
+                <form action="/login" method="POST" id="loginForm">
+                    <h2>Login</h2>
+
+                    <div class="input_box">
+                        <input type="text" name="name" placeholder="Enter your username" required />
+                        <i style="margin-left: -269px;" class="uil uil-user"></i>
+                    </div>
+
+                    <div class="input_box">
+                        <input type="password" name="password" placeholder="Enter your password" required />
+                        <i class="uil uil-lock password"></i>
+                        <i class="uil uil-eye-slash pw_hide"></i>
+                    </div>
+
+                    <div class="option_field">
+                        <a href="/forgot-password.html" class="forgot_pw">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="button">Login Now</button>
+
+                    <div class="login_signup">Don't have an account? <a href="#" id="signup">Signup</a></div>
+                </form>
+            </div>
+
+            <!-- Signup Form -->
+            <div class="form signup_form">
+                <form action="/signup" method="POST" id="signupForm">
+                    <h2>Signup</h2>
+            
+                    <div class="input_box">
+                        <input type="text" name="name" placeholder="Enter your username" required />
+                        <i style="margin-left: -269px;" class="uil uil-user"></i>
+                    </div>
+            
+                    <div class="input_box">
+                        <input type="email" name="email" placeholder="Enter your email" required />
+                        <i style="margin-left: -269px;" class="uil uil-envelope-alt"></i>
+                    </div>
+            
+                    <div class="input_box">
+                        <input type="password" name="createpassword" placeholder="Create password" required />
+                        <i style="margin-left: -269px;" class="uil uil-lock"></i>
+                        <i class="uil uil-eye-slash pw_hide"></i>
+                    </div>
+            
+                    <div class="input_box">
+                        <input type="password" name="password" placeholder="Confirm password" required />
+                        <i style="margin-left: -269px;"  class="uil uil-lock"></i>
+                        <i class="uil uil-eye-slash pw_hide"></i>
+                    </div>
+            
+                    <div class="input_box">
+                        <input type="text" name="mobile" placeholder="Enter your mobile number" required />
+                        <i style="margin-left: -269px;" class="uil uil-phone"></i>
+                    </div>
+            
+                    <div class="input_box gender_box">
+                        <label>Gender:</label>
+                        <input type="radio" name="gender" value="Male" required /> Male
+                        <input type="radio" name="gender" value="Female" required /> Female
+                    </div>
+            
+                    <button type="submit" class="button">Signup Now</button>
+            
+                    <div class="login_signup">Already have an account? <a href="#" id="loginLink">Login</a></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+
+    <script>
+
+const pwShowHide = document.querySelectorAll(".pw_hide");
+    pwShowHide.forEach((icon) => {
+      icon.addEventListener("click", () => {
+        let getPwInput = icon.parentElement.querySelector("input");
+        if (getPwInput.type === "password") {
+          getPwInput.type = "text";
+          icon.classList.replace("fa-eye-slash", "fa-eye");
+        } else {
+          getPwInput.type = "password";
+          icon.classList.replace("fa-eye", "fa-eye-slash");
+        }
+      });
+    });
+    
+function updateContent(newContent) {
+    document.getElementById('content').innerHTML = newContent;
+}
+
+// Default content when the page loads
+window.onload = function() {
+    updateContent(homeContent); // Display the home content by default
+};
+
+// Toggle between Login and Signup forms
+document.getElementById('signup').addEventListener('click', function() {
+    document.querySelector('.login_form').style.display = 'none';
+    document.querySelector('.signup_form').style.display = 'block';
+});
+
+document.getElementById('loginLink').addEventListener('click', function() {
+    document.querySelector('.signup_form').style.display = 'none';
+    document.querySelector('.login_form').style.display = 'block';
+});
+
+// Handle login form submission
+document.getElementById('loginForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const name = event.target.name.value;
+    const password = event.target.password.value;
+
+    if (!name || !password) {
+        alert("Name and Password are required❌");
+        return;
+    }
+
+    const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, password })
+    });
+
+    const data = await response.text();
+    if (response.ok) {
+        window.location.href = '../user/dashboard.html';  // Redirect to user page on successful login
+    } else {
+        alert(data);  // Show the error message if login fails
+    }
+});
+
+// Handle signup form submission
+document.getElementById('signupForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const name = event.target.name.value;
+    const email= event.target.email.value;
+    const createpassword = event.target.createpassword.value;
+    const password = event.target.password.value;
+    const mobile=event.target.mobile.value;
+    const gender=event.target.gender.value;
+
+    if (createpassword !== password) {
+        alert("Passwords do not match❌");
+        return;
+    }
+
+    const response = await fetch('/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, createpassword, password ,mobile,gender})
+    });
+
+    const data = await response.text();
+    if (response.ok) {
+        alert("User registered successfully!");
+        document.querySelector('.signup_form').style.display = 'none';
+        document.querySelector('.login_form').style.display = 'block';
+    } else {
+        alert(data);  // Show the error message if signup fails
+    }
+});
+
+const homeContent = `
+    <h2>Welcome to Budget Tracker</h2>
+    <p>The Budget Tracker Website is a user-friendly platform designed to help individuals and families 
+    manage their finances efficiently. <br> Our intuitive interface allows users to:</p>
+    <ul>
+        <li>Track income and expenses in real-time</li>
+        <li>Set up category-based budgets</li>
+        <li>Get insightful analytics to reach financial goals</li>
+    </ul>
+`;
+
+const financialPlanning = `
+    <h2>📊 Financial Planning</h2>
+    <p>We help you plan your finances efficiently with tools to manage savings, investments, and future expenses.</p>
+`;
+
+const budgeting = `
+    <h2>💰 Budget Management</h2>
+    <p>Create and customize budgets for different categories such as groceries, travel, and shopping.</p>
+`;
+
+const expenseTracking = `
+    <h2>📉 Expense Tracking</h2>
+    <p>Monitor your daily, weekly, and monthly expenses with detailed reports and analytics.</p>
+`;
+
+const contactContent = `
+    <h2>📞 Contact Us</h2>
+    <p>Email: <strong>budgettracker25@gmail.com</strong></p>
+`;
+    </script>
+</body>
+</html>

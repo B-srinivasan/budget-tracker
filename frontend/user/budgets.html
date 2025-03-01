@@ -1,0 +1,468 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Manager</title>
+    <style>
+        header {
+    background-color: #6a1b9a;
+    padding: 1em;
+    color: white;
+}
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 100px; /* Adds spacing on left and right */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    flex-shrink: 0;
+    margin-left: -90px; /* Moves the heading to the left */
+}
+
+.container button {
+    color: white;
+    text-align: right;
+    padding: 6px 24px;
+    border: 2px solid #fff;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: -90px; /* Moves the button further to the right */
+}
+
+header nav {
+    display: flex;
+    gap: 5em;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+        body {
+            font-family: "poppins", sans-serif;
+            margin: auto;
+            padding: 0;
+            background-image: url('bmg.png'); /* Set your image path */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            
+           
+        }
+
+        main {
+            max-width: 900px;
+            margin: 50px 0 200px 90px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1em;
+        }
+
+        table {
+            
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        .add-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #6a1b9a;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .add-btn:hover {
+            background-color: #4a148c;
+        }
+
+        /* Modal Styles */
+   /* Modal styles */
+#budget-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    width: 550px;
+    height: 650px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Form Grid Layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 20px;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#budget-create
+{
+    margin-left: 150px;
+    margin-bottom:40px ;
+    margin-top: 5px;
+}
+/* General form styles */
+label {
+    font-weight: bold;
+    margin-bottom: 2px;
+    font-size: 14px;
+}
+
+input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+/* Button styles */
+.form-buttons {
+    margin-top: 20px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button[type="submit"] {
+    background-color: purple;
+    color: white;
+}
+
+button.modal-close {
+    background-color: red;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+/* Form Grid Layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    column-gap: 90px; /* Horizontal gap between columns */
+    row-gap: 30px; /* Vertical gap between rows */
+    margin-left: 26px;
+}
+
+
+    </style>
+</head>
+    <body>
+    <header>
+            <div class="container">
+                <h1>Budget Tracker</h1>
+                <nav>
+                    <a href="/user/dashboard.html">Dashboard</a>
+                    <a href="/user/expenses.html">Manage Expenses</a>
+                    <a href="/user/budgets.html">Manage Budgets</a>
+                    <a href="/user/analytics.html">Reports and Analytics</a>
+                </nav>
+                <button id="logout">Logout</button>
+            </div>
+        </header>
+        <main>
+            <h1>Your Budgets</h1>
+            <table id="budget-table">
+                <thead>
+                    <tr>
+                        <th>Budget Name</th>
+                        <th>Monthly Income</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Details</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be dynamically inserted here -->
+                </tbody>
+            </table>
+            <a href="#" class="add-btn" id="open-modal-btn">Add New Budget</a>
+
+            <!-- Modal -->
+            <div id="budget-modal">
+                <div id="budget-modal-content">
+                    <h3 id="budget-create" style=" margin-bottom: 10px;">Create Custom Budget</h3>
+                    <form id="budget-form">
+                        <div class="form-grid">
+                            <!-- First Column -->
+                            <div class="form-column">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required>
+            
+                                <label for="income">Monthly Income</label>
+                                <input type="number" id="income" name="income" required>
+            
+                                <label for="start-date">Start Date</label>
+                                <input type="date" id="start-date" name="startDate" required>
+            
+                                <label for="end-date">End Date</label>
+                                <input type="date" id="end-date" name="endDate" required>
+                            </div>
+            
+                            <!-- Second Column -->
+                            <div class="form-column">
+                                <label for="food">Food</label>
+                                <input type="number" id="food" name="food">
+            
+                                <label for="transportation">Transportation</label>
+                                <input type="number" id="transportation" name="transportation">
+            
+                                <label for="shopping">Shopping</label>
+                                <input type="number" id="shopping" name="shopping">
+            
+                                <label for="bills">Bills</label>
+                                <input type="number" id="bills" name="bills">
+            
+                                <label for="entertainment">Entertainment</label>
+                                <input type="number" id="entertainment" name="entertainment">
+            
+                                <label for="education">Education</label>
+                                <input type="number" id="education" name="education">
+            
+                                <label for="other">Other</label>
+                                <input type="number" id="other" name="other">
+                            </div>
+                        </div>
+            
+                        <div class="form-buttons">
+                            <button type="submit">Create Budget</button>
+                            <button type="button" class="modal-close" id="close-modal-btn">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+                   
+        </main>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+    const modal = document.getElementById("budget-modal");
+    const openModalBtn = document.getElementById("open-modal-btn");
+    const closeModalBtn = document.getElementById("close-modal-btn");
+    const budgetForm = document.getElementById("budget-form");
+    const budgetTable = document.getElementById("budget-table").querySelector("tbody");
+
+    const fetchBudgets = async () => {
+        const response = await fetch("/api/budgets");
+        const budgets = await response.json();
+
+        budgetTable.innerHTML = "";
+        budgets.forEach((budget) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${budget.name}</td>
+            <td>${budget.income}</td>
+            <td>${new Date(budget.startDate).toLocaleDateString()}</td>
+            <td>${new Date(budget.endDate).toLocaleDateString()}</td>
+            <td><button class="details-btn" data-id="${budget._id}">View</button></td>
+            <td><button class="edit-btn" data-id="${budget._id}">Edit</button></td>
+            <td><button class="delete-btn" data-id="${budget._id}">Delete</button></td>
+        `;
+        budgetTable.appendChild(row);
+        });
+    };
+
+    const addBudget = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(budgetForm);
+
+        const budgetData = {};
+        formData.forEach((value, key) => budgetData[key] = value);
+
+        await fetch("/api/budgets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(budgetData)
+        });
+
+        modal.style.display = "none";
+        fetchBudgets();
+    };
+
+    const deleteBudget = async (id) => {
+        if (confirm("Are you sure you want to delete this budget?")) {
+        await fetch(`/api/budgets/${id}`, { method: "DELETE" });
+        fetchBudgets();
+        }
+    };
+
+    budgetTable.addEventListener("click", (e) => {
+    if (e.target.classList.contains("details-btn")) {
+        const id = e.target.dataset.id;
+        window.location.href = `../user/budget-details.html?id=${id}`;
+    } else if (e.target.classList.contains("edit-btn")) {
+        const id = e.target.dataset.id;
+        window.location.href = `../user/budget-details.html?id=${id}&edit=true`;
+    } else if (e.target.classList.contains("delete-btn")) {
+        const id = e.target.dataset.id;
+        deleteBudget(id);
+    }
+});
+
+budgetTable.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("edit-btn")) {
+    const id = e.target.dataset.id;
+
+    // Fetch the current budget details
+    const response = await fetch(`/api/budgets/${id}`);
+    const budget = await response.json();
+
+    // Populate the modal fields
+    document.getElementById("name").value = budget.name;
+    document.getElementById("income").value = budget.income;
+    document.getElementById("start-date").value = budget.startDate.split("T")[0];
+    document.getElementById("end-date").value = budget.endDate.split("T")[0];
+
+    ["food", "transportation", "shopping", "bills", "entertainment", "education", "other"].forEach((category) => {
+      document.getElementById(category).value = budget[category] || 0;
+      document.getElementById(`${category}-spent`).value = budget[`${category}Spent`] || 0;
+    });
+
+    // Handle save button
+    budgetForm.onsubmit = async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(budgetForm);
+      const updatedBudget = {};
+      formData.forEach((value, key) => (updatedBudget[key] = value));
+
+      await fetch(`/api/budgets/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedBudget),
+      });
+
+      modal.style.display = "none";
+      fetchBudgets();
+    };
+
+    // Open the modal
+    modal.style.display = "flex";
+  }
+});
+
+budgetTable.addEventListener("click", async (e) => {
+  if (e.target.classList.contains("edit-btn")) {
+    const id = e.target.dataset.id;
+
+    // Fetch the current budget details
+    const response = await fetch(`/api/budgets/${id}`);
+    const budget = await response.json();
+
+    // Populate the modal fields
+    document.getElementById("name").value = budget.name;
+    document.getElementById("income").value = budget.income;
+    document.getElementById("start-date").value = budget.startDate.split("T")[0];
+    document.getElementById("end-date").value = budget.endDate.split("T")[0];
+    document.getElementById("food").value = budget.food || 0;
+    document.getElementById("transportation").value = budget.transportation || 0;
+    document.getElementById("shopping").value = budget.shopping || 0;
+    document.getElementById("bills").value = budget.bills || 0;
+    document.getElementById("entertainment").value = budget.entertainment || 0;
+    document.getElementById("education").value = budget.education || 0;
+    document.getElementById("other").value = budget.other || 0;
+
+    // Change modal behavior for editing
+    budgetForm.onsubmit = async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(budgetForm);
+      const updatedBudget = {};
+      formData.forEach((value, key) => (updatedBudget[key] = value));
+
+      await fetch(`/api/budgets/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedBudget),
+      });
+
+      modal.style.display = "none";
+      fetchBudgets();
+    };
+
+    // Open the modal
+    modal.style.display = "flex";
+  }
+});
+
+
+    
+    openModalBtn.addEventListener("click", () => {
+        modal.style.display = "flex";
+    });
+
+    closeModalBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    budgetForm.addEventListener("submit", addBudget);
+    fetchBudgets();
+    });
+    document.getElementById('logout').addEventListener('click', () => {
+        const confirmation = confirm('Are you sure you want to log out?');
+        if (confirmation) {
+            fetch('/logout', { method: 'GET', credentials: 'include' })
+                .then(() => {
+                    window.location.href = '/'; // Redirect to the login page
+                })
+                .catch(err => console.error('Error logging out:', err));
+        }
+    });
+        </script>
+    </body> 
+    </html>

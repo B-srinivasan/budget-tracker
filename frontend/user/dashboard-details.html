@@ -1,0 +1,390 @@
+<body>
+  <header>
+    <div class="container">
+      <h1>Budget Dashboard</h1>
+      <nav>
+        <a href="/user/dashboard.html">Dashboard</a>
+        <a href="/user/expenses.html">Manage Expenses</a>
+        <a href="/user/budgets.html">Manage Budgets</a>
+        <a href="/user/analytics.html">Reports and Analytics</a>
+      </nav>
+      <button id="logout">Logout</button>
+    </div>
+    <style>
+      body {
+            font-family: "poppins", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        header {
+            background-color: #6a1b9a;
+            padding: 1em;
+            color: white;
+            text-align: center;
+        }
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 100px; /* Adds spacing on left and right */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    flex-shrink: 0;
+    margin-left: -90px; /* Moves the heading to the left */
+}
+
+.container button {
+    color: white;
+    text-align: right;
+    padding: 6px 24px;
+    border: 2px solid #fff;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: -90px; /* Moves the button further to the right */
+}
+
+header nav {
+    display: flex;
+    gap: 5em;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+      /* General chart container styles */
+/* Main container to arrange charts in a row */
+.charts-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 90px; /* Space between charts */
+  flex-wrap: wrap; /* Wrap if screen is small */
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Individual chart container */
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Smaller charts (Income vs Spent & Spent by Category) */
+.small-chart {
+  width: 280px; /* Smaller width */
+  height: 320px;
+}
+
+/* Wider chart (Allocated vs Spent) */
+.wide-chart {
+  width: 450px; /* Wider width */
+  height: 320px;
+}
+
+/* Chart size */
+canvas {
+  width: 100% !important;
+  height: 280px !important;
+}
+
+/* Chart name below */
+.chart-name {
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Main Container */
+#budget-container {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr; /* Budget details take 1 part, charts take 1.5 parts */
+  gap: 20px;
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Budget Details Section */
+#budget-info {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Charts Section */
+#charts-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* Individual Chart Container */
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Small Chart */
+.small-chart {
+  width: 280px;
+  height: 320px;
+}
+
+/* Wide Chart */
+.wide-chart {
+  width: 450px;
+  height: 320px;
+}
+
+/* Table Styling */
+#budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 40px;
+}
+
+#budget-table th, #budget-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+#budget-table th {
+  background-color: #6a1b9a;
+  font-weight: bold;
+  color: white;
+}
+
+/* Chart Labels */
+.chart-name {
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.srini{
+  font-size: larger;
+  justify-content: center;
+  text-align: center;
+  margin-left: 80px;
+
+}
+
+
+</style>
+  </header>
+
+  <main>
+    <section id="budget-container">
+      <div id="budget-info">
+        <h2 id="budget-name"></h2>
+        <p><strong>Monthly Income:</strong> <span id="monthly-income"></span></p>
+        <p><strong>Total Allocated Amount:</strong> <span id="total-allocated"></span></p>
+        <p><strong>Total Spent Amount:</strong> <span id="total-spent"></span></p>
+        <p><strong>Remaining Balance:</strong> <span id="remaining-balance"></span></p>
+        
+        <h3>Budget Categories</h3>
+        <table id="budget-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Allocated Amount</th>
+              <th>Spent Amount</th>
+              <th>Remaining Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <a href="/user/budgets.html" class="srini">click here to Manage Budgets</a>
+
+      </div>
+    
+      <div id="charts-container">
+        <div class="chart-container small-chart">
+          <canvas id="incomeVsSpentChart"></canvas>
+          <p class="chart-name">Income vs Spent</p>
+        </div>
+        <div class="chart-container small-chart">
+          <canvas id="spentByCategoryChart"></canvas>
+          <p class="chart-name">Spent by Category</p>
+        </div>
+        <div class="chart-container wide-chart">
+          <canvas id="allocatedVsSpentChart"></canvas>
+          <p class="chart-name">Allocated vs Spent</p>
+        </div>
+      </div>
+    </section>    
+    
+  </main>
+
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const budgetId = urlParams.get("id");
+
+  if (!budgetId) {
+    document.getElementById("budget-info").innerHTML = "<p>Invalid Budget ID.</p>";
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/budgets/${budgetId}`);
+    const budget = await response.json();
+
+    const categories = [
+      { name: "Food", allocated: budget.food || 0, spent: budget.foodSpent || 0 },
+      { name: "Transportation", allocated: budget.transportation || 0, spent: budget.transportationSpent || 0 },
+      { name: "Shopping", allocated: budget.shopping || 0, spent: budget.shoppingSpent || 0 },
+      { name: "Bills", allocated: budget.bills || 0, spent: budget.billsSpent || 0 },
+      { name: "Entertainment", allocated: budget.entertainment || 0, spent: budget.entertainmentSpent || 0 },
+      { name: "Education", allocated: budget.education || 0, spent: budget.educationSpent || 0 },
+      { name: "Other", allocated: budget.other || 0, spent: budget.otherSpent || 0 },
+    ];
+
+    const totalAllocated = categories.reduce((sum, cat) => sum + cat.allocated, 0);
+    const totalSpent = categories.reduce((sum, cat) => sum + cat.spent, 0);
+    const remainingBalance = budget.income - totalSpent;
+
+    // Populate budget details
+    document.getElementById("budget-name").innerText = budget.name;
+    document.getElementById("monthly-income").innerText = budget.income.toFixed(2);
+    document.getElementById("total-allocated").innerText = totalAllocated.toFixed(2);
+    document.getElementById("total-spent").innerText = totalSpent.toFixed(2);
+    document.getElementById("remaining-balance").innerText = remainingBalance.toFixed(2);
+
+    // Populate budget categories table
+    const tableBody = document.querySelector("#budget-table tbody");
+    tableBody.innerHTML = categories.map(category => `
+      <tr>
+        <td>${category.name}</td>
+        <td>${category.allocated.toFixed(2)}</td>
+        <td>${category.spent.toFixed(2)}</td>
+        <td>${(category.allocated - category.spent).toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    // Generate Charts
+    generateCharts(budget, categories);
+
+  } catch (error) {
+    console.error("Error fetching budget details:", error);
+    document.getElementById("budget-info").innerHTML = "<p>Error loading budget details.</p>";
+  }
+});
+
+    function generateCharts(budget, categories) {
+      // Pie Chart - Income vs. Spent
+      const incomeVsSpentCtx = document.getElementById('incomeVsSpentChart').getContext('2d');
+      new Chart(incomeVsSpentCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Total Spent', 'Remaining Balance'],
+          datasets: [{
+            data: [categories.reduce((sum, cat) => sum + cat.spent, 0), budget.income - categories.reduce((sum, cat) => sum + cat.spent, 0)],
+            backgroundColor: ['#ff6384', '#36a2eb']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+
+      // Pie Chart - Spent by Category
+      const spentByCategoryCtx = document.getElementById('spentByCategoryChart').getContext('2d');
+      new Chart(spentByCategoryCtx, {
+        type: 'pie',
+        data: {
+          labels: categories.map(cat => cat.name),
+          datasets: [{
+            data: categories.map(cat => cat.spent),
+            backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff', '#ff9f40', '#c9cbcf']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+
+      // Bar Graph - Allocated vs. Spent
+      const allocatedVsSpentCtx = document.getElementById('allocatedVsSpentChart').getContext('2d');
+      new Chart(allocatedVsSpentCtx, {
+        type: 'bar',
+        data: {
+          labels: categories.map(cat => cat.name),
+          datasets: [
+            {
+              label: 'Allocated Amount',
+              data: categories.map(cat => cat.allocated),
+              backgroundColor: '#36a2eb'
+            },
+            {
+              label: 'Spent Amount',
+              data: categories.map(cat => cat.spent),
+              backgroundColor: '#ff6384'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { stacked: false },
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+    document.getElementById('logout').addEventListener('click', () => {
+        const confirmation = confirm('Are you sure you want to log out?');
+        if (confirmation) {
+            fetch('/logout', { method: 'GET', credentials: 'include' })
+                .then(() => {
+                    window.location.href = '/'; // Redirect to the login page
+                })
+                .catch(err => console.error('Error logging out:', err));
+        }
+    }); 
+  </script>
+</body>

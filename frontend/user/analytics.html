@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Reports</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+         header {
+    background-color: #6a1b9a;
+    padding: 1em;
+    color: white;
+}
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 100px; /* Adds spacing on left and right */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    flex-shrink: 0;
+    margin-left: -90px; /* Moves the heading to the left */
+}
+
+.container button {
+    color: white;
+    text-align: right;
+    padding: 6px 24px;
+    border: 2px solid #fff;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: -90px; /* Moves the button further to the right */
+}
+header nav {
+    display: flex;
+    gap: 5em;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+        body {
+            font-family: "poppins", sans-serif;
+            text-align: center;
+            margin: auto;
+        }
+        .chart-container {
+            width: 80%; /* Adjust the width */
+            max-width: 600px; /* Prevent it from being too large */
+            margin: auto; /* Center align */
+            margin-right: 90px;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+        .container{
+            background: #6a1b9a;
+        }
+        .container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.chart-container {
+    flex: 1;
+    min-width: 300px;
+    height: 300px;
+    margin-bottom: 30px;
+}
+
+.chart-containers{
+    width: 80%; /* Adjust the width */
+            max-width: 600px; /* Prevent it from being too large */
+            margin: auto; /* Center align */ 
+            margin-top: 50px;
+            padding: 10px;
+            margin-left: 100px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+}
+.report-messages {
+            width: 80%; /* Adjust the width */
+            max-width: 600px; /* Prevent it from being too large */
+            margin: auto; /* Center align */
+            margin-left: 90px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    .table-container{
+        margin-right: 250px;
+        margin-top: 50px;
+        color: white;
+    }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Budget Tracker</h1>
+            <nav>
+                <a href="/user/dashboard.html">Dashboard</a>
+                <a href="/user/expenses.html">Manage Expenses</a>
+                <a href="/user/budgets.html">Manage Budgets</a>
+                <a href="/user/analytics.html">Reports and Analytics</a>
+            </nav>
+            <button id="logout">Logout</button>
+        </div>
+    </header>  
+    <h2>Budget Reports</h2>
+    <div class="chart-container">
+        <canvas id="reportChart"></canvas>
+    </div>
+    <div class="report-messages" style="margin-right: 800px; margin-top: -300px;margin-bottom: 100px;">
+        <h3>Insights & Recommendations</h3>
+        <p id="budgetMessage"></p>
+        <p id="overspendingAlert"></p>
+        <p id="savingsSuggestion"></p>
+    </div>
+    <div class="container">
+<div class="chart-containers">
+    <canvas id="dateWiseChart"></canvas>
+</div>
+<div class="table-container">
+    <h3>Date-wise Expenses</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody id="expenseTableBody"></tbody>
+    </table>
+</div>
+    </div>
+<script>
+    async function fetchReports() {
+        try {
+            const response = await fetch('http://localhost:3000/api/reports');
+            const data = await response.json();
+            console.log("Fetched Report Data:", data);
+
+            if (!data || data.message) {
+                document.body.innerHTML += "<p>No data available.</p>";
+                return;
+            }
+
+            // Category-wise breakdown with fallback values
+            const labels = ["Food", "Transportation", "Shopping", "Bills", "Entertainment", "Education", "Other"];
+            const values = [
+                data.totalFood || 0, data.totalTransportation || 0, data.totalShopping || 0,
+                data.totalBills || 0, data.totalEntertainment || 0, data.totalEducation || 0, data.totalOther || 0
+            ];
+
+            const ctx = document.getElementById('reportChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Expenses Breakdown',
+                        data: values,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+             // Date-wise spending trend (Line Chart)
+        if (data.dateWiseExpenses && data.dateWiseExpenses.length > 0) {
+            const dateLabels = data.dateWiseExpenses.map(entry => entry.date);
+            const dateValues = data.dateWiseExpenses.map(entry => entry.total);
+
+            const dateCtx = document.getElementById('dateWiseChart').getContext('2d');
+            new Chart(dateCtx, {
+                type: 'line',
+                data: {
+                    labels: dateLabels,
+                    datasets: [{
+                        label: 'Date-wise Spending',
+                        data: dateValues,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Table - Date-wise Expenses
+        const expenseTableBody = document.getElementById('expenseTableBody');
+        expenseTableBody.innerHTML = "";
+        if (data.dateWiseExpenses && data.dateWiseExpenses.length > 0) {
+            data.dateWiseExpenses.forEach(entry => {
+                entry.categories.forEach(category => {
+                    const row = `<tr><td>${entry.date}</td><td>${category.name}</td><td>${category.amount.toFixed(2)}</td></tr>`;
+                    expenseTableBody.innerHTML += row;
+                });
+            });
+        } else {
+            expenseTableBody.innerHTML = "<tr><td colspan='3'>No expenses recorded</td></tr>";
+        }
+
+            // Generate messages
+            const budgetMessage = document.getElementById('budgetMessage');
+            const overspendingAlert = document.getElementById('overspendingAlert');
+            const savingsSuggestion = document.getElementById('savingsSuggestion');
+            
+            if (data.totalExpenses > data.totalBudget) {
+                overspendingAlert.innerHTML = "🚨 You have exceeded your budget! Consider reducing expenses.";
+            } else {
+                overspendingAlert.innerHTML = "✅ You are within budget. Keep up the good work!";
+            }
+            
+            budgetMessage.innerHTML = `📊 Total Budget: $${data.totalBudget} | Total Spent: $${data.totalExpenses}`;
+            savingsSuggestion.innerHTML = "💡 Try setting aside more savings by reducing unnecessary expenses.";
+
+        } catch (error) {
+            console.error("Error fetching reports:", error);
+        }
+    }
+
+    fetchReports();
+
+    document.getElementById('logout').addEventListener('click', () => {
+    const confirmation = confirm('Are you sure you want to log out?');
+    if (confirmation) {
+        fetch('/logout', { method: 'GET', credentials: 'include' })
+            .then(() => {
+                window.location.href = '/'; // Redirect to the login page
+            })
+            .catch(err => console.error('Error logging out:', err));
+    }
+});
+    </script>
+</body>
+</html>

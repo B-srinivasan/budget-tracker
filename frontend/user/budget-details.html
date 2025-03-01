@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #6a1b9a;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        main {
+            padding: 20px;
+        }
+        h2, h3 {
+            margin-top: 10px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color:#6a1b9a ;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #6a1b9a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1 style="color: white;">Budget Details</h1>
+        </div>
+    </header>
+    <main>
+        <section id="budget-details">
+            <!-- Budget details will be dynamically inserted here -->
+        </section>
+        <div id="edit-buttons" style="display: none;">
+            <button id="save-changes-btn">Save Changes</button>
+            <button id="cancel-edit-btn" onclick="window.location.href='../user/budgets.html'" style="background-color: red;">Cancel</button>
+        </div>
+        <button id="back-btn" onclick="window.location.href='../user/budgets.html'">Back</button>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const budgetId = urlParams.get("id");
+            const isEdit = urlParams.get("edit") === "true";
+        
+            if (!budgetId) {
+                document.getElementById("budget-details").innerHTML = "<p>Invalid Budget ID.</p>";
+                return;
+            }
+        
+            try {
+                const response = await fetch(`/api/budgets/${budgetId}`);
+                const budget = await response.json();
+        
+                const detailsSection = document.getElementById("budget-details");
+
+                if (isEdit) {
+                    // In Edit Mode, create editable inputs for both allocated and spent amounts
+                    detailsSection.innerHTML = `
+                        <h2><input type="text" id="name" value="${budget.name}" /></h2>
+                        <p><strong>Monthly Income:</strong> <input type="number" id="income" value="${budget.income}" /></p>
+                        <p><strong>Start Date:</strong> <input type="date" id="start-date" value="${budget.startDate.split('T')[0]}" /></p>
+                        <p><strong>End Date:</strong> <input type="date" id="end-date" value="${budget.endDate.split('T')[0]}" /></p>
+                        <h3>Budget Categories</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Allocated Amount</th>
+                                    <th>Spent Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Render all categories with both allocated and spent amounts -->
+                                ${["food", "transportation", "shopping", "bills", "entertainment", "education", "other"].map(
+                                    (category) => `
+                                        <tr>
+                                            <td>${category.charAt(0).toUpperCase() + category.slice(1)}</td>
+                                            <td><input type="number" id="allocated-${category}" value="${budget[category] || 0}" /></td>
+                                            <td><input type="number" id="spent-${category}" value="${budget[category + 'Spent'] || 0}" /></td>
+                                        </tr>
+                                    `
+                                ).join("")}
+                            </tbody>
+                        </table>
+                    `;
+                    document.getElementById("edit-buttons").style.display = "block";
+                    document.getElementById("back-btn").style.display = "none";
+                } else {
+                    // View Mode, display budget details without inputs
+                    const categories = [
+                        { name: "Food", allocated: budget.food || 0, spent: budget.foodSpent || 0 },
+                        { name: "Transportation", allocated: budget.transportation || 0, spent: budget.transportationSpent || 0 },
+                        { name: "Shopping", allocated: budget.shopping || 0, spent: budget.shoppingSpent || 0 },
+                        { name: "Bills", allocated: budget.bills || 0, spent: budget.billsSpent || 0 },
+                        { name: "Entertainment", allocated: budget.entertainment || 0, spent: budget.entertainmentSpent || 0 },
+                        { name: "Education", allocated: budget.education || 0, spent: budget.educationSpent || 0 },
+                        { name: "Other", allocated: budget.other || 0, spent: budget.otherSpent || 0 },
+                    ];
+
+                    detailsSection.innerHTML = `
+                        <h2>${budget.name}</h2>
+                        <p><strong>Monthly Income:</strong> ${budget.income}</p>
+                        <p><strong>Start Date:</strong> ${new Date(budget.startDate).toLocaleDateString()}</p>
+                        <p><strong>End Date:</strong> ${new Date(budget.endDate).toLocaleDateString()}</p>
+                        <h3>Budget Categories</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Allocated Amount</th>
+                                    <th>Spent Amount</th>
+                                    <th>Remaining Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${categories.map(category => `
+                                    <tr>
+                                        <td>${category.name}</td>
+                                        <td>${category.allocated.toFixed(2)}</td>
+                                        <td>${category.spent.toFixed(2)}</td>
+                                        <td>${(category.allocated - category.spent).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error fetching budget details:", error);
+                document.getElementById("budget-details").innerHTML = "<p>Error loading budget details.</p>";
+            }
+            
+            document.getElementById("save-changes-btn").addEventListener("click", async () => {
+    const updatedData = {
+        name: document.getElementById("name").value,
+        income: parseFloat(document.getElementById("income").value),
+        startDate: document.getElementById("start-date").value,
+        endDate: document.getElementById("end-date").value,
+        food: parseFloat(document.getElementById("allocated-food").value) || 0,
+        foodSpent: parseFloat(document.getElementById("spent-food").value) || 0,
+        transportation: parseFloat(document.getElementById("allocated-transportation").value) || 0,
+        transportationSpent: parseFloat(document.getElementById("spent-transportation").value) || 0,
+        shopping: parseFloat(document.getElementById("allocated-shopping").value) || 0,
+        shoppingSpent: parseFloat(document.getElementById("spent-shopping").value) || 0,
+        bills: parseFloat(document.getElementById("allocated-bills").value) || 0,
+        billsSpent: parseFloat(document.getElementById("spent-bills").value) || 0,
+        entertainment: parseFloat(document.getElementById("allocated-entertainment").value) || 0,
+        entertainmentSpent: parseFloat(document.getElementById("spent-entertainment").value) || 0,
+        education: parseFloat(document.getElementById("allocated-education").value) || 0,
+        educationSpent: parseFloat(document.getElementById("spent-education").value) || 0,
+        other: parseFloat(document.getElementById("allocated-other").value) || 0,
+        otherSpent: parseFloat(document.getElementById("spent-other").value) || 0
+    };
+
+    try {
+        await fetch(`/api/budgets/${budgetId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedData),
+        });
+
+        alert("Budget updated successfully!");
+        // Redirect to budgets.html after saving changes
+        window.location.href = "../user/budgets.html";
+    } catch (error) {
+        console.error("Error saving changes:", error);
+        alert("Failed to save changes. Please try again.");
+    }
+});
+
+        });
+    </script>
+</body>
+</html>

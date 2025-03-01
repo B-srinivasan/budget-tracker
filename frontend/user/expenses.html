@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker</title>
+    <style>
+        body {
+            font-family: "poppins", sans-serif;
+            margin: auto;
+            padding: 0;
+            background-image: url('exp.png'); /* Set your image path */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        header {
+    background-color: #6a1b9a;
+    padding: 1em;
+    color: white;
+}
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 100px; /* Adds spacing on left and right */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    flex-shrink: 0;
+    margin-left: -90px; /* Moves the heading to the left */
+}
+
+.container button {
+    color: white;
+    text-align: right;
+    padding: 6px 24px;
+    border: 2px solid #fff;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: -90px; /* Moves the button further to the right */
+}
+header nav {
+    display: flex;
+    gap: 5em;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+        main {
+            padding: 2em;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1em;
+            margin-top: 20px;
+        }
+
+        table {
+            margin-left: 200px;
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border: 1px solid #ddd;
+        }
+
+        table th, table td {
+            padding: 0.8em;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-decoration: underline;
+        }
+
+        .delete-btn:hover {
+            text-decoration: none;
+        }
+
+        .add-expense {
+            display: block;
+            width: 250px;
+            margin: 1em auto;
+            padding: 0.8em 1.5em;
+            background-color: #6a1b9a;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .add-expense:hover {
+            background-color: #4a148c;
+        }
+
+        #add-expense-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #add-expense-modal > div {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Budget Tracker</h1>
+            <nav>
+                <a href="/user/dashboard.html">Dashboard</a>
+                <a href="/user/expenses.html">Manage Expenses</a>
+                <a href="/user/budgets.html">Manage Budgets</a>
+                <a href="/user/analytics.html">Reports and Analytics</a>
+            </nav>
+            <button id="logout">Logout</button>
+        </div>
+    </header>    
+    <main>
+        <h1 style="margin-left: 360px;">Expenses</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="expense-table-body">
+                <!-- Dynamic rows will be inserted here -->
+            </tbody>
+        </table>
+        <a href="#" class="add-expense" id="open-modal" style="margin-right: 130px;">Add New Expense</a>
+
+        <!-- Add Expense Modal -->
+        <div id="add-expense-modal" style="display: none;">
+            <div>
+                <h2 style="text-align: center;">Add New Expense</h2>
+                <form id="add-expense-form">
+                    <label for="date" >Date</label><br>
+                    <input type="date" id="date" name="date" required><br><br>
+
+                    <label for="category">Category</label><br>
+                    <input type="text" id="category" name="category" required><br><br>
+
+                    <label for="amount">Amount</label><br>
+                    <input type="number" id="amount" name="amount" required><br><br>
+
+                    <label for="description">Description</label><br>
+                    <textarea id="description" name="description" rows="3" required></textarea><br><br>
+
+                    <button type="submit" style="background-color: #6a1b9a; color: white; padding: 10px; border: none; width: 100%; border-radius: 5px;">Save</button>
+                </form>
+                <button onclick="closeModal()" style="background-color: red; color: white; padding: 10px; border: none; width: 100%; margin-top: 10px; border-radius: 5px;">Cancel</button>
+            </div>
+        </div>
+    </main>
+    <script>
+        // Fetch all expenses
+        async function fetchExpenses() {
+            try {
+                const response = await fetch('/api/expenses');
+                if (!response.ok) throw new Error('Failed to fetch expenses');
+    
+                const expenses = await response.json();
+                const tableBody = document.getElementById('expense-table-body');
+                tableBody.innerHTML = ''; // Clear existing rows
+    
+                expenses.forEach(expense => addExpenseToTable(expense));
+            } catch (error) {
+                console.error('Error fetching expenses:', error.message);
+            }
+        }
+    
+        function formatDate(isoDate) {
+            const date = new Date(isoDate);
+             const day = String(date.getDate()).padStart(2, '0');
+             const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+         }
+
+        // Add a new expense to the table
+        function addExpenseToTable(expense) {
+            const tableBody = document.getElementById('expense-table-body');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${formatDate(expense.date)}</td>
+        <td>${expense.category}</td>
+        <td>${expense.amount}</td>
+        <td>${expense.description}</td>
+        <td><button class="delete-btn" data-id="${expense._id}">Delete</button></td>
+    `;
+    const deleteButton = row.querySelector('.delete-btn');
+    deleteButton.style.color = 'red'; 
+    deleteButton.addEventListener('click', async (e) => {
+        const id = e.target.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this expense?')) {
+            await deleteExpense(id);
+            row.remove();
+        }
+    });
+    tableBody.appendChild(row);
+}
+         
+    
+        // Delete expense
+        async function deleteExpense(id) {
+    try {
+        console.log("Deleting expense with ID:", id); // ✅ Debugging step
+
+        const response = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+
+        if (response.ok) {
+            alert('Expense deleted successfully');
+            fetchExpenses(); // ✅ Fetch updated data after deletion
+        } else {
+            alert('Failed to delete expense');
+        }
+    } catch (error) {
+        console.error('Error deleting expense:', error);
+    }
+}
+
+    
+        // Add a new expense
+        document.getElementById('add-expense-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+    
+            const date = document.getElementById('date').value;
+            const category = document.getElementById('category').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const description = document.getElementById('description').value;
+    
+            const newExpense = { date, category, amount, description };
+    
+            try {
+                const response = await fetch('/api/expenses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newExpense),
+                });
+    
+                if (response.ok) {
+                    const addedExpense = await response.json();
+                    addExpenseToTable(addedExpense);
+                    alert('Expense added successfully');
+                    closeModal();
+                } else {
+                    alert('Failed to add expense');
+                }
+            } catch (error) {
+                console.error('Error adding expense:', error);
+            }
+        });
+    
+        // Open modal
+        document.getElementById('open-modal').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('add-expense-modal').style.display = 'flex';
+        });
+    
+        // Close modal
+        function closeModal() {
+            document.getElementById('add-expense-modal').style.display = 'none';
+        }
+    
+        // Fetch expenses on page load
+        document.addEventListener('DOMContentLoaded', fetchExpenses);
+
+        document.getElementById('logout').addEventListener('click', () => {
+    const confirmation = confirm('Are you sure you want to log out?');
+    if (confirmation) {
+        fetch('/logout', { method: 'GET', credentials: 'include' })
+            .then(() => {
+                window.location.href = '/'; // Redirect to the login page
+            })
+            .catch(err => console.error('Error logging out:', err));
+    }
+});
+
+
+    </script>    
+</body>
+</html>
