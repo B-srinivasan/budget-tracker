@@ -22,12 +22,15 @@ For Developers
   3.	git clone https://github.com /B-srinivasan//budget-tracker.git
         cd budget-tracker
   4.	Install Dependencies:
-          npm install express mongoose cors dotenv body-parser nodemon bcryptjs chart.js 
-  5.	Start the Database Server:
+          npm install express mongoose cors dotenv body-parser nodemon bcryptjs chart.js and
+    	    create .env file and in that file give
+    	EMAIL=yourgmail.com
+      EMAIL_PASSWORD=yourpassword
+  6.	Start the Database Server:
           mongod
-  6.	Run the Application:
+  7.	Run the Application:
           node backend/server.js
-7.	Access the Application:
+8.	Access the Application:
 Open a browser and go to http://localhost:3000
 For Users
 •	Visit the hosted application URL & Create an account or log in.
