@@ -36,3 +36,9 @@ For Users
 •	Visit the hosted application URL & Create an account or log in.
 •	Navigate through the dashboard to manage budgets and expenses.
 
+![Screenshot 2025-02-18 210050](https://github.com/user-attachments/assets/d0290cb0-a770-4061-918a-b62d019760b0)
+![Screenshot 2025-02-18 210525](https://github.com/user-attachments/assets/bd7fc2c5-9139-4755-a134-d5e8bacbaa62)
+![Screenshot 2025-02-18 210640](https://github.com/user-attachments/assets/e8245bac-4591-41de-a193-4179176cf323)
+
+
+
